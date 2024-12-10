@@ -28,6 +28,10 @@ fun main() {
 
     val dictionary = loadDictionary()
 
+    val totalCount = dictionary.size
+    val learnedCount = dictionary.filter { it.correctAnswersCount >= 3 }.run { size }
+    val percent =  (learnedCount.toDouble() / totalCount.toDouble() * 100).toInt()
+
     while (true) {
         println(
             """
@@ -41,7 +45,10 @@ fun main() {
         val click = readln().toInt()
         when (click) {
             1 -> println("Вы выбрали пункт \"учить слова\"")
-            2 -> println("Вы выбрали пункт \"статистика\"")
+            2 -> println(
+                "Вы выбрали пункт \"статистика\" \nВыучено " +
+                        "$learnedCount из $totalCount слов | $percent%" + "\n"
+            )
             0 -> return
             else -> println("Введите число 1, 2 или 0")
         }
