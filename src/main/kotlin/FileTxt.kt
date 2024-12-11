@@ -31,7 +31,7 @@ fun main() {
     val notLearnedList = dictionary.filter { it.correctAnswersCount <= 2 }
 
     val questionWords = notLearnedList.shuffled().map { it.translation }.take(4)
-    val correctAnswer = notLearnedList.shuffled().map { it.original }.take(1)
+    val correctAnswer = questionWords[0]
 
     val totalCount = dictionary.size
     val learnedCount = dictionary.filter { it.correctAnswersCount >= 3 }.run { size }
@@ -53,14 +53,14 @@ fun main() {
                 println(
                     """
                         
-             ${correctAnswer.first()}:
+             ${correctAnswer}:
              1 – ${questionWords[0]}
              2 – ${questionWords[1]}
              3 – ${questionWords[2]}
              4 - ${questionWords[3]}
                       """.trimIndent()
                 )
-                val userAnswerInput  = readln().toInt()
+                val userAnswerInput = readln().toInt()
             }
 
             2 -> println(
