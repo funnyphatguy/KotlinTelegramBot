@@ -29,7 +29,6 @@ fun main() {
     val dictionary = loadDictionary()
 
     val notLearnedList = dictionary.filter { it.correctAnswersCount <= 2 }
-    println(notLearnedList)
 
     val questionWords = notLearnedList.shuffled().map { it.translation }.take(4)
     val correctAnswer = notLearnedList.shuffled().map { it.original }.take(1)
@@ -61,7 +60,7 @@ fun main() {
              4 - ${questionWords[3]}
                       """.trimIndent()
                 )
-                val userAnswer = readln()
+                val userAnswerInput  = readln().toInt()
             }
 
             2 -> println(
