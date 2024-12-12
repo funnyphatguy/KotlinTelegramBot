@@ -8,7 +8,7 @@ data class Word(
     val correctAnswersCount: Int = 0
 )
 
-val wordsFile = File("words.txt")
+var wordsFile = File("words.txt")
 
 fun loadDictionary(): List<Word> {
     val dictionary: MutableList<Word> = mutableListOf()
@@ -24,6 +24,14 @@ fun loadDictionary(): List<Word> {
     return dictionary
 }
 
+fun saveDictionary(dictionary: List<Word>) {
+    wordsFile.printWriter().use { out ->
+        dictionary.forEach { word -> // Здесь word — это текущий объект Word из списка
+            out.println("${word.original}|${word.translation}|${word.correctAnswersCount}")
+        }
+    }
+}
+
 fun main() {
 
     val dictionary = loadDictionary()
@@ -31,7 +39,7 @@ fun main() {
     val notLearnedList = dictionary.filter { it.correctAnswersCount <= 2 }
 
     val questionWords = notLearnedList.shuffled().map { it.translation }.take(4)
-    val correctAnswer = questionWords[0]
+    val correctAnswer = notLearnedList.map { it.original }.random()
 
     val totalCount = dictionary.size
     val learnedCount = dictionary.filter { it.correctAnswersCount >= 3 }.run { size }
@@ -40,6 +48,7 @@ fun main() {
     while (true) {
         println(
             """
+
              Меню: 
              1 – Учить слова
              2 – Статистика
@@ -58,9 +67,25 @@ fun main() {
              2 – ${questionWords[1]}
              3 – ${questionWords[2]}
              4 - ${questionWords[3]}
+             ----------
+             0 - Меню
                       """.trimIndent()
                 )
                 val userAnswerInput = readln().toInt()
+                when (userAnswerInput) {
+                    0 -> continue
+                    in 1..4 -> {
+                        val correctAnswerId = questionWords.indexOf(correctAnswer)
+                        if ((correctAnswerId+1) == userAnswerInput) {
+                            println("Правильно!")
+                            val correctAnswersCountUpdate = notLearnedList.find { it.original == correctAnswer }
+                                ?.let { it.copy(correctAnswersCount = it.correctAnswersCount + 1) }
+                            saveDictionary(dictionary)
+                        } else
+                            println("Неправильно! $correctAnswer – это ${questionWords[userAnswerInput - 1]}")
+                    }
+                }
+
             }
 
             2 -> println(
