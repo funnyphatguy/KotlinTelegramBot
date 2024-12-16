@@ -32,16 +32,20 @@ fun saveDictionary(dictionary: List<Word>) {
     }
 }
 
+const val MAXIMUM_VARIANTS = 4
+const val WORLD_LEARNING_TARGET = 2
+const val LEARNING_WORD_QUANTITY = 3
+
 fun main() {
 
     val dictionary = loadDictionary()
 
-    val notLearnedList = dictionary.filter { it.correctAnswersCount <= 2 }.toMutableList()
-    val questionWords = notLearnedList.shuffled().take(4)
+    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }.toMutableList()
+    val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
     val correctAnswer = notLearnedList.random()
 
     val totalCount = dictionary.size
-    val learnedCount = dictionary.filter { it.correctAnswersCount >= 3 }.run { size }
+    val learnedCount = dictionary.filter { it.correctAnswersCount >= LEARNING_WORD_QUANTITY }.run { size }
     val percent = (learnedCount.toDouble() / totalCount.toDouble() * 100).toInt()
 
     while (true) {
