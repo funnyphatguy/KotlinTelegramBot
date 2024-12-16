@@ -27,7 +27,7 @@ fun loadDictionary(): List<Word> {
 fun saveDictionary(dictionary: List<Word>) {
     wordsFile.printWriter().use { out ->
         dictionary.forEach { word ->
-            out.println("${word.original}|${word.translation}|${word.correctAnswersCount}")
+            out.write("${word.original}|${word.translation}|${word.correctAnswersCount}\n")
         }
     }
 }
@@ -40,7 +40,7 @@ fun main() {
 
     val dictionary = loadDictionary()
 
-    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }.toMutableList()
+    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }
     val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
     val correctAnswer = notLearnedList.random()
 
@@ -68,23 +68,22 @@ fun main() {
                         postfix = "\n-------- \n0 - Меню"
                     )
                 println(variants)
-                val userAnswerInput = readln().toInt()
-                when (userAnswerInput) {
+                when (val userAnswerInput = readln().toInt()) {
                     0 -> continue
                     in 1..4 -> {
                         val userAnswerId = questionWords[userAnswerInput - 1].translation
                         if (userAnswerId == correctAnswer.translation) {
-                            println("Правильно!")
+                            println("Правильно!\n")
 
-                            val updatedWord =
-                                correctAnswer.copy(correctAnswersCount = correctAnswer.correctAnswersCount + 1)
-                            notLearnedList[questionWords.indexOf(correctAnswer)] = updatedWord
-                            saveDictionary(dictionary)
-                        } else {
+                            val updatedWord = dictionary.map {
+                                if (it.original == correctAnswer.translation) {
+                                    it.copy(correctAnswersCount = it.correctAnswersCount + 1)
+                                } else it
+                            }
+                            saveDictionary(updatedWord)
+                        } else
                             println("Неправильно! ${correctAnswer.original} – это ${correctAnswer.translation}")
-                        }
                     }
-
                     else -> println("Введите номер от 0 до 4")
                 }
             }
