@@ -8,7 +8,7 @@ data class Word(
     val correctAnswersCount: Int = 0
 )
 
-var wordsFile = File("words.txt")
+val wordsFile = File("words.txt")
 
 fun loadDictionary(): List<Word> {
     val dictionary: MutableList<Word> = mutableListOf()
@@ -26,7 +26,7 @@ fun loadDictionary(): List<Word> {
 
 fun saveDictionary(dictionary: List<Word>) {
     wordsFile.printWriter().use { out ->
-        dictionary.forEach { word -> // Здесь word — это текущий объект Word из списка
+        dictionary.forEach { word ->
             out.println("${word.original}|${word.translation}|${word.correctAnswersCount}")
         }
     }
@@ -36,10 +36,9 @@ fun main() {
 
     val dictionary = loadDictionary()
 
-    val notLearnedList = dictionary.filter { it.correctAnswersCount <= 2 }
-
-    val questionWords = notLearnedList.shuffled().map { it.translation }.take(4)
-    val correctAnswer = notLearnedList.map { it.original }.random()
+    val notLearnedList = dictionary.filter { it.correctAnswersCount <= 2 }.toMutableList()
+    val questionWords = notLearnedList.shuffled().take(4)
+    val correctAnswer = notLearnedList.random()
 
     val totalCount = dictionary.size
     val learnedCount = dictionary.filter { it.correctAnswersCount >= 3 }.run { size }
@@ -48,7 +47,6 @@ fun main() {
     while (true) {
         println(
             """
-
              Меню: 
              1 – Учить слова
              2 – Статистика
@@ -59,33 +57,32 @@ fun main() {
         when (click) {
             1 -> if (notLearnedList.size == 0) println("Все слова в словаре выучены")
             else {
-                println(
-                    """
-                        
-             ${correctAnswer}:
-             1 – ${questionWords[0]}
-             2 – ${questionWords[1]}
-             3 – ${questionWords[2]}
-             4 - ${questionWords[3]}
-             ----------
-             0 - Меню
-                      """.trimIndent()
-                )
+                val variants =
+                    questionWords.mapIndexed { index, word -> "${index + 1} - ${word.translation}" }.joinToString(
+                        separator = "\n",
+                        prefix = "\n${correctAnswer.original}:\n",
+                        postfix = "\n-------- \n0 - Меню"
+                    )
+                println(variants)
                 val userAnswerInput = readln().toInt()
                 when (userAnswerInput) {
                     0 -> continue
                     in 1..4 -> {
-                        val correctAnswerId = questionWords.indexOf(correctAnswer)
-                        if ((correctAnswerId+1) == userAnswerInput) {
+                        val userAnswerId = questionWords[userAnswerInput - 1].translation
+                        if (userAnswerId == correctAnswer.translation) {
                             println("Правильно!")
-                            val correctAnswersCountUpdate = notLearnedList.find { it.original == correctAnswer }
-                                ?.let { it.copy(correctAnswersCount = it.correctAnswersCount + 1) }
-                            saveDictionary(dictionary)
-                        } else
-                            println("Неправильно! $correctAnswer – это ${questionWords[userAnswerInput - 1]}")
-                    }
-                }
 
+                            val updatedWord =
+                                correctAnswer.copy(correctAnswersCount = correctAnswer.correctAnswersCount + 1)
+                            notLearnedList[questionWords.indexOf(correctAnswer)] = updatedWord
+                            saveDictionary(dictionary)
+                        } else {
+                            println("Неправильно! ${correctAnswer.original} – это ${correctAnswer.translation}")
+                        }
+                    }
+
+                    else -> println("Введите номер от 0 до 4")
+                }
             }
 
             2 -> println(
@@ -98,6 +95,8 @@ fun main() {
         }
     }
 }
+
+
 
 
 
