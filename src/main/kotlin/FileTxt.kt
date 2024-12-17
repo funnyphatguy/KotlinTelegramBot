@@ -27,6 +27,7 @@ fun loadDictionary(): List<Word> {
 fun saveDictionary(dictionary: List<Word>) {
     wordsFile.printWriter().use { out ->
         dictionary.forEach { word ->
+            println("${word.original}|${word.translation}|${word.correctAnswersCount}")
             out.write("${word.original}|${word.translation}|${word.correctAnswersCount}\n")
         }
     }
@@ -38,7 +39,7 @@ const val LEARNING_WORD_QUANTITY = 3
 
 fun main() {
 
-    val dictionary = loadDictionary()
+    val dictionary = loadDictionary().toMutableList()
 
     val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }
     val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
@@ -59,7 +60,7 @@ fun main() {
         )
         val click = readln().toInt()
         when (click) {
-            1 -> if (notLearnedList.size == 0) println("Все слова в словаре выучены")
+            1 -> if (notLearnedList.isEmpty()) println("Все слова в словаре выучены")
             else {
                 val variants =
                     questionWords.mapIndexed { index, word -> "${index + 1} - ${word.translation}" }.joinToString(
@@ -74,16 +75,18 @@ fun main() {
                         val userAnswerId = questionWords[userAnswerInput - 1].translation
                         if (userAnswerId == correctAnswer.translation) {
                             println("Правильно!\n")
+                            val updated = questionWords[userAnswerInput - 1]
+                            val updatedWord = updated.copy(correctAnswersCount = updated.correctAnswersCount + 1)
 
-                            val updatedWord = dictionary.map {
-                                if (it.original == correctAnswer.translation) {
-                                    it.copy(correctAnswersCount = it.correctAnswersCount + 1)
-                                } else it
-                            }
-                            saveDictionary(updatedWord)
+                            val index =
+                                dictionary.indexOfFirst { it.original == updated.original }
+                            dictionary[index] = updatedWord
+                            println(dictionary)
+                            saveDictionary(dictionary)
                         } else
                             println("Неправильно! ${correctAnswer.original} – это ${correctAnswer.translation}")
                     }
+
                     else -> println("Введите номер от 0 до 4")
                 }
             }
@@ -98,8 +101,3 @@ fun main() {
         }
     }
 }
-
-
-
-
-
