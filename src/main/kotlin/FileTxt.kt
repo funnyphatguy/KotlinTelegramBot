@@ -40,10 +40,6 @@ fun main() {
 
     val dictionary = loadDictionary().toMutableList()
 
-//    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }
-//    val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
-//    val correctAnswer = notLearnedList.random()
-
     val totalCount = dictionary.size
     val learnedCount = dictionary.filter { it.correctAnswersCount >= LEARNING_WORD_QUANTITY }.run { size }
     val percent = (learnedCount.toDouble() / totalCount.toDouble() * 100).toInt()
