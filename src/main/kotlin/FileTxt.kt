@@ -1,4 +1,3 @@
-
 package org.example
 
 import java.io.File
@@ -6,7 +5,7 @@ import java.io.File
 data class Word(
     val original: String,
     val translation: String,
-    val correctAnswersCount: Int = 0
+    var correctAnswersCount: Int = 0
 )
 
 val wordsFile = File("words.txt")
@@ -65,6 +64,7 @@ fun main() {
                         println("Все слова в словаре выучены")
                         break
                     }
+
                     val variants =
                         questionWords.mapIndexed { index, word -> "${index + 1} - ${word.translation}" }.joinToString(
                             separator = "\n",
@@ -74,16 +74,12 @@ fun main() {
                     println(variants)
 
                     when (val userAnswerInput = readln().toInt()) {
-                        0 -> break // Вернуться в главное меню
+                        0 -> break
                         in 1..4 -> {
-                            val userAnswerId = questionWords[userAnswerInput - 1].translation
-                            if (userAnswerId == correctAnswer.translation) {
-                                println("Правильно!\n")
-                                val updated = questionWords[userAnswerInput - 1]
-                                val updatedWord = updated.copy(correctAnswersCount = updated.correctAnswersCount + 1)
-
-                                val index = dictionary.indexOfFirst { it.original == updated.original }
-                                dictionary[index] = updatedWord
+                            val userAnswerId = questionWords.indexOf(correctAnswer)
+                            if (userAnswerInput.minus(1) == userAnswerId) {
+                                println("Правильно!")
+                                correctAnswer.correctAnswersCount++
                                 saveDictionary(dictionary)
                             } else
                                 println("Неправильно! ${correctAnswer.original} – это ${correctAnswer.translation}")
