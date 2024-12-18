@@ -40,9 +40,9 @@ fun main() {
 
     val dictionary = loadDictionary().toMutableList()
 
-    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }
-    val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
-    val correctAnswer = notLearnedList.random()
+//    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }
+//    val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
+//    val correctAnswer = notLearnedList.random()
 
     val totalCount = dictionary.size
     val learnedCount = dictionary.filter { it.correctAnswersCount >= LEARNING_WORD_QUANTITY }.run { size }
@@ -57,13 +57,18 @@ fun main() {
              0 – Выход
              """.trimIndent()
         )
+
         when (val click = readln().toInt()) {
             1 -> {
                 while (true) {
+                    val notLearnedList = dictionary.filter { it.correctAnswersCount <= WORLD_LEARNING_TARGET }
                     if (notLearnedList.isEmpty()) {
                         println("Все слова в словаре выучены")
                         break
                     }
+
+                    val questionWords = notLearnedList.shuffled().take(MAXIMUM_VARIANTS)
+                    val correctAnswer = notLearnedList.random()
 
                     val variants =
                         questionWords.mapIndexed { index, word -> "${index + 1} - ${word.translation}" }.joinToString(
