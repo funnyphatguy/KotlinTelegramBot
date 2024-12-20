@@ -8,7 +8,7 @@ data class Word(
     var correctAnswersCount: Int = 0
 )
 
-fun Question.asConsoleString(): String{
+fun Question.asConsoleString(): String {
     val variants =
         this.questionWords.mapIndexed { index, word -> "${index + 1} - ${word.translation}" }.joinToString(
             separator = "\n",
@@ -21,8 +21,12 @@ fun Question.asConsoleString(): String{
 val wordsFile = File("words.txt")
 
 fun main() {
-
-val trainer = LearnWordsTrainer()
+    val trainer = try {
+        LearnWordsTrainer(3, 4, 2)
+    } catch (e: Exception) {
+        println("Невозможно загрузить словарь")
+        return
+    }
 
     while (true) {
         println(
@@ -34,7 +38,7 @@ val trainer = LearnWordsTrainer()
              """.trimIndent()
         )
 
-        when (val click = readln().toInt()) {
+        when (val click = readln().toIntOrNull()) {
             1 -> {
                 while (true) {
                     val question = trainer.getNextQuestion()
@@ -45,28 +49,31 @@ val trainer = LearnWordsTrainer()
 
                     println((question.asConsoleString()))
 
-                    when (val userAnswerInput = readln().toInt()) {
+                    when (val userAnswerInput = readln().toIntOrNull()) {
                         0 -> break
 
                         in 1..4 -> {
 
-                            if (trainer.checkAnswer(userAnswerInput.minus(1))) {
-                                println("Правильно!")
+                            if (userAnswerInput != null) {
+                                if (trainer.checkAnswer(userAnswerInput.minus(1))) {
+                                    println("Правильно!")
 
-                            } else
-                                println("Неправильно! ${question.correctAnswer.original} – это ${question.correctAnswer.translation}")
+                                } else
+                                    println("Неправильно! ${question.correctAnswer.original} – это ${question.correctAnswer.translation}")
+                            }
                         }
+
                         else -> println("Введите номер от 0 до 4")
                     }
                 }
             }
 
-            2 ->
-            {val statistics = trainer.getStatistics()
+            2 -> {
+                val statistics = trainer.getStatistics()
                 println(
-                "Вы выбрали пункт \"статистика\" \nВыучено " +
-                        "${statistics.learnedCount} из ${statistics.totalCount} слов | ${statistics.percent}%" + "\n"
-            )
+                    "Вы выбрали пункт \"статистика\" \nВыучено " +
+                            "${statistics.learnedCount} из ${statistics.totalCount} слов | ${statistics.percent}%" + "\n"
+                )
             }
 
             0 -> return
