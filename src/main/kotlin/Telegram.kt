@@ -15,12 +15,21 @@ fun main(args: Array<String>) {
         val updates: String = getUpdates(botToken, updateId)
         println(updates)
 
-        val startUpdateId = updates.lastIndexOf("update_id")
-        val endUpdateId = updates.lastIndexOf(",\n\"message\"")
-        if (startUpdateId == -1 || endUpdateId == -1) continue
-        val updateIdString = updates.substring(startUpdateId + 11, endUpdateId)
-        println(updateIdString)
-        updateId = updateIdString.toInt() + 1
+        val updateIdRegex: Regex = """"update_id":(\d+)(?=,)""".toRegex()
+        val updateIdMatchResult: MatchResult? = updateIdRegex.find(updates)
+        if (updateIdMatchResult != null) {
+            val updateIdString = updateIdMatchResult.groupValues[1]
+            println("update_id: $updateIdString")
+            updateId = updateIdString.toInt() + 1
+        }
+
+        val messageRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
+        val matchResult: MatchResult? = messageRegex.find(updates)
+        val groups = matchResult?.groups
+        val text = groups?.get(1)?.value
+
+        if (text != null)
+            println("Текст сообщения: $text")
     }
 }
 
