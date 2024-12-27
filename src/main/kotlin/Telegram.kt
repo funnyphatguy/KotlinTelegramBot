@@ -2,9 +2,8 @@ package org.example
 
 fun main(args: Array<String>) {
 
-    val botService = TelegramBotService()
+    val botService = TelegramBotService(botToken = args[0])
 
-    val botToken = args[0]
     var updateId = 0
 
     val updateIdRegex: Regex = """"update_id":(\d+)(?=,)""".toRegex()
@@ -15,7 +14,7 @@ fun main(args: Array<String>) {
 
     while (true) {
         Thread.sleep(2000)
-        val updates: String = botService.getUpdates(botToken, updateId)
+        val updates: String = botService.getUpdates(updateId)
         println(updates)
 
         updateId = updateIdRegex.find(updates)?.groupValues?.get(1)?.toIntOrNull()?.plus(1) ?: continue
@@ -27,7 +26,7 @@ fun main(args: Array<String>) {
         val chatId = chatIdRegex.find(updates)?.groups?.get(1)?.value
         println("Chat ID: $chatId")
 
-        val message = botService.sendMessage(botToken, chatId, messageText = "Hello")
+        val message = botService.sendMessage(chatId, messageText = "Hello")
         println(message)
     }
 }
