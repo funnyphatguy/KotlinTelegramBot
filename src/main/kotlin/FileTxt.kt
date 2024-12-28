@@ -1,12 +1,5 @@
 package org.example
-
 import java.io.File
-
-data class Word(
-    val original: String,
-    val translation: String,
-    var correctAnswersCount: Int = 0
-)
 
 fun Question.asConsoleString(): String {
     val variants =

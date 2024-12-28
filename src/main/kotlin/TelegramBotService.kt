@@ -26,4 +26,37 @@ class TelegramBotService(val botToken: String) {
 
         return response.body()
     }
+
+    fun sendMenu(chatId: String?): String {
+        val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
+        val sendMenuBody = """
+    {
+        "chat_id": "$chatId",
+        "text": "Основное меню",
+        "reply_markup": {
+            "inline_keyboard": [
+                [
+                    {
+                        "text": "Изучать слова",
+                        "callback_data": "data1"
+                    }
+                ],
+                [
+                    {
+                        "text": "Статистика",
+                        "callback_data": "data2"
+                    }
+                ]
+            ]
+        }
+    }
+""".trimIndent()
+        val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
+            .build()
+        val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
+
+        return response.body()
+    }
 }

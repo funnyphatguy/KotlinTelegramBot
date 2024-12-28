@@ -1,5 +1,11 @@
 package org.example
 
+data class Word(
+    val original: String,
+    val translation: String,
+    var correctAnswersCount: Int = 0
+)
+
 data class Statistics(
     val totalCount: Int,
     val learnedCount: Int,
