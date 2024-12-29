@@ -6,6 +6,8 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
 const val BOT_URL = "https://api.telegram.org/bot"
+const val LEARN_WORDS_RESPONSE = "learn_words_clicked"
+const val STATISTICS_RESPONSE = "statistics_clicked"
 
 class TelegramBotService(val botToken: String) {
 
@@ -27,7 +29,7 @@ class TelegramBotService(val botToken: String) {
         return response.body()
     }
 
-    fun sendMenu(chatId: String?): String {
+    fun sendMenu(chatId: String): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val sendMenuBody = """
     {
@@ -38,13 +40,13 @@ class TelegramBotService(val botToken: String) {
                 [
                     {
                         "text": "Изучать слова",
-                        "callback_data": "data1"
+                        "callback_data": "$LEARN_WORDS_RESPONSE"
                     }
                 ],
                 [
                     {
                         "text": "Статистика",
-                        "callback_data": "data2"
+                        "callback_data": "$STATISTICS_RESPONSE"
                     }
                 ]
             ]

@@ -32,7 +32,9 @@ fun main(args: Array<String>) {
             if (text.lowercase() == "hello") {
                botService.sendMessage(chatId, messageText = "Hello")
             } else if (text.lowercase() == "menu") {
-                botService.sendMenu(chatId)
+                if (chatId != null) {
+                    botService.sendMenu(chatId)
+                }
             }
         }
     }
