@@ -26,8 +26,17 @@ fun main(args: Array<String>) {
         val chatId = chatIdRegex.find(updates)?.groups?.get(1)?.value
         println("Chat ID: $chatId")
 
-        val message = botService.sendMessage(chatId, messageText = "Hello")
-        println(message)
+        val trainer: LearnWordsTrainer = LearnWordsTrainer()
+
+        if (text != null) {
+            if (text.lowercase() == "hello") {
+               botService.sendMessage(chatId, messageText = "Hello")
+            } else if (text.lowercase() == "menu") {
+                if (chatId != null) {
+                    botService.sendMenu(chatId)
+                }
+            }
+        }
     }
 }
 
