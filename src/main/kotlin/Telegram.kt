@@ -33,16 +33,8 @@ fun main(args: Array<String>) {
 
         val trainer: LearnWordsTrainer = LearnWordsTrainer()
 
-
-        val statistics = trainer.getStatistics()
-        println(statistics)
-
-
         if (data?.lowercase() == STATISTICS_RESPONSE && chatId != null) {
-            botService.sendMessage(chatId, messageText = "Выучено ${statistics.learnedCount} из ${statistics.totalCount} слов | ${statistics.percent}%")
-        }
-
-        if (data?.lowercase() == STATISTICS_RESPONSE && chatId != null) {
+            val statistics = trainer.getStatistics()
             botService.sendMessage(chatId, messageText = "Выучено ${statistics.learnedCount} из ${statistics.totalCount} слов | ${statistics.percent}%")
         }
 
