@@ -1,9 +1,11 @@
 package org.example
 
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.nio.charset.StandardCharsets
 
 const val BOT_URL = "https://api.telegram.org/bot"
 const val LEARN_WORDS_RESPONSE = "learn_words_clicked"
@@ -14,7 +16,13 @@ class TelegramBotService(val botToken: String) {
     private val client: HttpClient = HttpClient.newBuilder().build()
 
     fun sendMessage(chatId: String?, messageText: String): String {
-        val urlSendMessage: String = "$BOT_URL$botToken/sendMessage?text=$messageText&chat_id=$chatId"
+        val encoded = URLEncoder.encode(
+            messageText,
+            StandardCharsets.UTF_8
+        )
+        println(encoded)
+
+        val urlSendMessage: String = "$BOT_URL$botToken/sendMessage?text=$encoded&chat_id=$chatId"
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
 
