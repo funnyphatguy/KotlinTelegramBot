@@ -1,5 +1,7 @@
 package org.example
 
+import javax.management.QueryExp
+
 data class Word(
     val original: String,
     val translation: String,
@@ -17,12 +19,12 @@ data class Question(
     val correctAnswer: Word,
 )
 
+
 class LearnWordsTrainer(
     private val learningAnswerCount: Int = 3,
     private val countOfQuestionWords: Int = 4,
     private val worldLearningTarget: Int = 2,
 ) {
-
     private var question: Question? = null
     private val dictionary = loadDictionary().toMutableList()
 
