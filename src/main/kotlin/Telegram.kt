@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
         if (text != null)
             println("Текст сообщения: $text")
 
-        val chatId = chatIdRegex.find(updates)?.groups?.get(1)?.value?.toInt()
+        val chatId = chatIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: 0
         println("Chat ID: $chatId")
 
         val data = dataRegex.find(updates)?.groups?.get(1)?.value
@@ -48,6 +48,11 @@ fun main(args: Array<String>) {
             } else if (question == null)
                 telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
         }
+
+        if (chatId != null) {
+            checkNextQuestionAndSend(trainer,botService,chatId)
+        }
+
 
         if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX && chatId != null) {
             botService.sendMessage(

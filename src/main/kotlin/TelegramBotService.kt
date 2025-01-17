@@ -42,7 +42,18 @@ class TelegramBotService(val botToken: String) {
     fun sendQuestion(chatId: Int, question: Question): String {
 
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
-        val questionWord = question.questionWords.mapIndexed { index, word -> Pair(index+1, word.translation) }
+
+        val variantsString = question.questionWords
+            .mapIndexed { index, word ->
+                """
+        {
+            "text": "${word.translation}",
+            "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX$index"
+        }
+        """.trimIndent()
+            }
+            .joinToString(",")
+
         val sendAnswerBody = """
     {
         "chat_id": "$chatId",
@@ -50,28 +61,7 @@ class TelegramBotService(val botToken: String) {
         "reply_markup": {
             "inline_keyboard": [
                 [
-                    {
-                        "text": "${questionWord[0].second}",
-                        "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX}${questionWord[0].first}"
-                    }
-                ],
-                [
-                    {
-                        "text": "${questionWord[1].second}",
-                        "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX}${questionWord[1].first}"
-                    }
-                ],
-                [
-                    {
-                        "text": "${questionWord[2].second}",
-                        "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX}${questionWord[2].first}"
-                    }
-                ],
-                [
-                    {
-                        "text": "${questionWord[3].second}",
-                        "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX}${questionWord[3].first}"
-                    }
+                   $variantsString
                 ],
                 [
                     {
