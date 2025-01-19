@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
         if (text != null)
             println("Текст сообщения: $text")
 
-        val chatId = chatIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: 0
+        val chatId = chatIdRegex.find(updates)?.groups?.get(1)?.value?.toLongOrNull() ?: 0
         println("Chat ID: $chatId")
 
         val data = dataRegex.find(updates)?.groups?.get(1)?.value
@@ -37,24 +37,20 @@ fun main(args: Array<String>) {
         fun checkNextQuestionAndSend(
             trainer: LearnWordsTrainer,
             telegramBotService: TelegramBotService,
-            chatId: Int
+            chatId: Long
         ) {
             val question = trainer.getNextQuestion()
-            if (data?.lowercase() == LEARN_WORDS_RESPONSE_PREFIX
-                && chatId != null
-                && question != null
+            if (data?.lowercase() == LEARN_WORDS_RESPONSE_PREFIX && question != null
             ) {
                 telegramBotService.sendQuestion(chatId, question)
             } else if (question == null)
                 telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
         }
 
-        if (chatId != null) {
-            checkNextQuestionAndSend(trainer,botService,chatId)
-        }
+        checkNextQuestionAndSend(trainer,botService,chatId)
 
 
-        if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX && chatId != null) {
+        if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
             botService.sendMessage(
                 chatId,
                 messageText = "Выучено ${statistics.learnedCount} " +
@@ -62,11 +58,11 @@ fun main(args: Array<String>) {
             )
         }
 
-        if (text?.lowercase() == "start" && chatId != null) {
+        if (text?.lowercase() == "start") {
             botService.sendMessage(chatId, messageText = "Hello!")
         }
 
-        if (text?.lowercase() == "menu" && chatId != null) {
+        if (text?.lowercase() == "menu") {
             botService.sendMenu(chatId)
         }
     }

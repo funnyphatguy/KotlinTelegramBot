@@ -17,7 +17,7 @@ class TelegramBotService(val botToken: String) {
 
     private val client: HttpClient = HttpClient.newBuilder().build()
 
-    fun sendMessage(chatId: Int, messageText: String): String {
+    fun sendMessage(chatId: Long, messageText: String): String {
         val encoded = URLEncoder.encode(
             messageText,
             StandardCharsets.UTF_8
@@ -39,7 +39,7 @@ class TelegramBotService(val botToken: String) {
         return response.body()
     }
 
-    fun sendQuestion(chatId: Int, question: Question): String {
+    fun sendQuestion(chatId: Long, question: Question): String {
 
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
 
@@ -82,7 +82,7 @@ class TelegramBotService(val botToken: String) {
         return response.body()
     }
 
-    fun sendMenu(chatId: Int): String {
+    fun sendMenu(chatId: Long): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val sendMenuBody = """
     {
