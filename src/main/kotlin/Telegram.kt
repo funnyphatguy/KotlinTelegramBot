@@ -1,6 +1,12 @@
 package org.example
 
+
+
 fun main(args: Array<String>) {
+
+    val trainer: LearnWordsTrainer = LearnWordsTrainer()
+
+    val statistics = trainer.getStatistics()
 
     val botService = TelegramBotService(botToken = args[0])
 
@@ -31,9 +37,6 @@ fun main(args: Array<String>) {
         val data = dataRegex.find(updates)?.groups?.get(1)?.value
         println("Дата $data")
 
-        val trainer: LearnWordsTrainer = LearnWordsTrainer()
-        val statistics = trainer.getStatistics()
-
         fun checkNextQuestionAndSend(
             trainer: LearnWordsTrainer,
             telegramBotService: TelegramBotService,
@@ -42,21 +45,23 @@ fun main(args: Array<String>) {
             val question = trainer.getNextQuestion()
             if (data?.lowercase() == LEARN_WORDS_RESPONSE_PREFIX && question != null
             ) {
-
                 telegramBotService.sendQuestion(chatId, question)
             } else if (question == null)
                 telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
         }
 
         if (data != null) {
-            checkNextQuestionAndSend(trainer,botService,chatId)
             if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)){
                 val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
-                println("НОМБЕР $userAnswerIndex")
-                    if (trainer.checkAnswer(userAnswerIndex)) botService.sendMessage(chatId, messageText = "Ок")
-                else botService.sendMessage(chatId, messageText = "Не ок")
-            }
+                if (trainer.checkAnswer(userAnswerIndex))
+                    botService.sendMessage(chatId, messageText = "Ок")
+
+                else
+                    botService.sendMessage(chatId, messageText = "Не ок")
+            } else checkNextQuestionAndSend(trainer,botService,chatId)
         }
+
+
 
 
         if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
