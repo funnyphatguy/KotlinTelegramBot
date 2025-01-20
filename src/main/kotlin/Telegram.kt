@@ -43,22 +43,25 @@ fun main(args: Array<String>) {
             chatId: Long
         ) {
             val question = trainer.getNextQuestion()
-            if (data?.lowercase() == LEARN_WORDS_RESPONSE_PREFIX && question != null
+            if (question != null
             ) {
                 telegramBotService.sendQuestion(chatId, question)
-            } else if (question == null)
-                telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
+            } else telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
         }
 
         if (data != null) {
             if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)){
                 val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
-                if (trainer.checkAnswer(userAnswerIndex))
+                if (trainer.checkAnswer(userAnswerIndex)) {
                     botService.sendMessage(chatId, messageText = "Ок")
-
-                else
+                    checkNextQuestionAndSend(trainer, botService, chatId)
+                }
+                else {
                     botService.sendMessage(chatId, messageText = "Не ок")
-            } else checkNextQuestionAndSend(trainer,botService,chatId)
+                    checkNextQuestionAndSend(trainer, botService, chatId)
+                }
+            } else if (data.lowercase() == LEARN_WORDS_RESPONSE_PREFIX)
+                checkNextQuestionAndSend(trainer,botService,chatId)
         }
 
 
