@@ -1,10 +1,11 @@
 package org.example
 
 
-
 fun main(args: Array<String>) {
 
     val trainer: LearnWordsTrainer = LearnWordsTrainer()
+
+    var currentQuestion: Question? = null
 
     val statistics = trainer.getStatistics()
 
@@ -42,30 +43,39 @@ fun main(args: Array<String>) {
             telegramBotService: TelegramBotService,
             chatId: Long
         ) {
-            val question = trainer.getNextQuestion()
-            if (question != null
+            currentQuestion = trainer.getNextQuestion()
+            if (currentQuestion != null
             ) {
-                telegramBotService.sendQuestion(chatId, question)
+                telegramBotService.sendQuestion(chatId, currentQuestion!!)
             } else telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
         }
 
         if (data != null) {
-            if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)){
+            if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)) {
                 val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
+
                 if (trainer.checkAnswer(userAnswerIndex)) {
-                    botService.sendMessage(chatId, messageText = "Ок")
+                    botService.sendMessage(chatId, messageText = "Правильно!")
                     checkNextQuestionAndSend(trainer, botService, chatId)
-                }
-                else {
-                    botService.sendMessage(chatId, messageText = "Не ок")
-                    checkNextQuestionAndSend(trainer, botService, chatId)
+                } else {
+                    botService.sendMessage(
+                        chatId,
+                        messageText = "Неправильно! ${currentQuestion?.correctAnswer?.original} " +
+                                "это ${currentQuestion?.correctAnswer?.translation}"
+                    )
+                    checkNextQuestionAndSend(
+                        trainer,
+                        botService,
+                        chatId
+                    )
                 }
             } else if (data.lowercase() == LEARN_WORDS_RESPONSE_PREFIX)
-                checkNextQuestionAndSend(trainer,botService,chatId)
+                checkNextQuestionAndSend(trainer, botService, chatId)
         }
 
-
-
+        if (data?.lowercase() == BACK_PREFIX) {
+            botService.sendMenu(chatId)
+        }
 
         if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
             botService.sendMessage(
@@ -84,4 +94,3 @@ fun main(args: Array<String>) {
         }
     }
 }
-

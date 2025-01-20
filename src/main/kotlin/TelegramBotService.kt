@@ -47,8 +47,7 @@ class TelegramBotService(val botToken: String) {
             .mapIndexed { index, word ->
                 """
         {
-            "text": "${word.translation}
-            ${question.questionWords.indexOf(question.correctAnswer)}",
+            "text": "${word.translation}",
             "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX$index"
         }
         """.trimIndent()
