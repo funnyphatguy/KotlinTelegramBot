@@ -1,7 +1,9 @@
 package org.example
 
+import kotlinx.serialization.Serializable
 import javax.management.QueryExp
 
+@Serializable
 data class Word(
     val original: String,
     val translation: String,
