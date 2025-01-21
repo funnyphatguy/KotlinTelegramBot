@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 data class Update(
     @SerialName("update_id")
     val updateId: Long,
-    @SerialName("text")
+    @SerialName("message")
     val message: Message? = null,
     @SerialName("callback_query")
     val callbackQuery: CallbackQuery? = null,
@@ -74,7 +74,7 @@ fun main(args: Array<String>) {
 
     val statistics = trainer.getStatistics()
 
-    val botService = TelegramBotService(botToken = args[0])
+    val botService = TelegramBotService(json = Json, botToken = args[0])
 
     var lastUpdateId = 0L
 
@@ -92,16 +92,13 @@ fun main(args: Array<String>) {
         val updateId = firstUpdate.updateId
         lastUpdateId = updateId + 1
 
-
         val message = firstUpdate.message?.text
 
         val chatId = firstUpdate.message?.chat?.id ?: firstUpdate.callbackQuery?.message?.chat?.id
 
         val data = firstUpdate.callbackQuery?.data
 
-
         fun checkNextQuestionAndSend(
-            json: Json,
             trainer: LearnWordsTrainer,
             telegramBotService: TelegramBotService,
             chatId: Long?
@@ -109,8 +106,8 @@ fun main(args: Array<String>) {
             currentQuestion = trainer.getNextQuestion()
             if (currentQuestion != null
             ) {
-                telegramBotService.sendQuestion(json, chatId, currentQuestion!!)
-            } else telegramBotService.sendMessage(json, chatId, message = "Вы выучили все слова в списке")
+                telegramBotService.sendQuestion(chatId, currentQuestion!!)
+            } else telegramBotService.sendMessage(chatId, message = "Вы выучили все слова в списке")
         }
 
         if (data != null) {
@@ -118,33 +115,30 @@ fun main(args: Array<String>) {
                 val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
 
                 if (trainer.checkAnswer(userAnswerIndex)) {
-                    botService.sendMessage(json, chatId, message = "Правильно!")
-                    checkNextQuestionAndSend(json, trainer, botService, chatId)
+                    botService.sendMessage(chatId, message = "Правильно!")
+                    checkNextQuestionAndSend(trainer, botService, chatId)
                 } else {
                     botService.sendMessage(
-                        json,
                         chatId,
                         message = "Неправильно! ${currentQuestion?.correctAnswer?.original} " +
                                 "это ${currentQuestion?.correctAnswer?.translation}"
                     )
                     checkNextQuestionAndSend(
-                        json,
                         trainer,
                         botService,
                         chatId
                     )
                 }
             } else if (data.lowercase() == LEARN_WORDS_RESPONSE_PREFIX)
-                checkNextQuestionAndSend(json, trainer, botService, chatId)
+                checkNextQuestionAndSend(trainer, botService, chatId)
         }
 
         if (data?.lowercase() == BACK_PREFIX) {
-            botService.sendMenu(json, chatId)
+            botService.sendMenu(chatId)
         }
 
         if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
             botService.sendMessage(
-                json,
                 chatId,
                 message = "Выучено ${statistics.learnedCount} " +
                         "из ${statistics.totalCount} слов | ${statistics.percent}%"
@@ -152,11 +146,11 @@ fun main(args: Array<String>) {
         }
 
         if (message?.lowercase() == "start") {
-            botService.sendMessage(json,chatId, message = "Hello!")
+            botService.sendMessage(chatId, message = "Hello!")
         }
 
         if (message?.lowercase() == "/start") {
-            botService.sendMenu(json, chatId)
+            botService.sendMenu(chatId)
         }
     }
 }

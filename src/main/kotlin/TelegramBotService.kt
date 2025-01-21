@@ -11,14 +11,12 @@ const val LEARN_WORDS_RESPONSE_PREFIX = "learn_words_clicked"
 const val STATISTICS_RESPONSE_PREFIX = "statistics_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 const val BACK_PREFIX = "back"
-val json = Json {
-    ignoreUnknownKeys = true
-}
-class TelegramBotService(val botToken: String) {
+
+class TelegramBotService(private val json: Json, private val botToken: String) {
 
     private val client: HttpClient = HttpClient.newBuilder().build()
 
-    fun sendMessage(json:Json,chatId: Long?, message: String): String {
+    fun sendMessage(chatId: Long?, message: String): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
@@ -43,7 +41,7 @@ class TelegramBotService(val botToken: String) {
         return response.body()
     }
 
-    fun sendQuestion(json:Json, chatId: Long?, question: Question): String {
+    fun sendQuestion(chatId: Long?, question: Question): String {
 
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
 
@@ -69,6 +67,7 @@ class TelegramBotService(val botToken: String) {
                 })
             )
         )
+
         val requestBodyString = json.encodeToString(requestBody)
 
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
@@ -80,19 +79,21 @@ class TelegramBotService(val botToken: String) {
         return response.body()
     }
 
-    fun sendMenu(json: Json, chatId: Long?): String {
+    fun sendMenu(chatId: Long?): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
             text = "Основное меню",
             replyMarkup = ReplyMarkup(
-                listOf(listOf(
-                    InlineKeyBoard(text = "Изучать слова", callbackData = LEARN_WORDS_RESPONSE_PREFIX),
-                    InlineKeyBoard(text = "Статистика", callbackData = STATISTICS_RESPONSE_PREFIX),
-                ))
+                listOf(
+                    listOf(
+                        InlineKeyBoard(text = "Изучать слова", callbackData = LEARN_WORDS_RESPONSE_PREFIX),
+                        InlineKeyBoard(text = "Статистика", callbackData = STATISTICS_RESPONSE_PREFIX),
+                    )
+                )
             )
         )
-val requestBodyString = json.encodeToString(requestBody)
+        val requestBodyString = json.encodeToString(requestBody)
 
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
             .header("Content-Type", "application/json")
