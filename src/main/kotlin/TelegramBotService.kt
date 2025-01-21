@@ -12,7 +12,7 @@ const val STATISTICS_RESPONSE_PREFIX = "statistics_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 const val BACK_PREFIX = "back"
 
-class TelegramBotService(private val json: Json, private val botToken: String) {
+class TelegramBotService(val json: Json, private val botToken: String) {
 
     private val client: HttpClient = HttpClient.newBuilder().build()
 

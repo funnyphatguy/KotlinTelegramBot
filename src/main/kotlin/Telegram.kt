@@ -74,19 +74,15 @@ fun main(args: Array<String>) {
 
     val statistics = trainer.getStatistics()
 
-    val botService = TelegramBotService(json = Json, botToken = args[0])
+    val botService = TelegramBotService(json = Json { ignoreUnknownKeys = true }, botToken = args[0])
 
     var lastUpdateId = 0L
-
-    val json = Json {
-        ignoreUnknownKeys = true
-    }
 
     while (true) {
         Thread.sleep(2000)
         val responseString: String = botService.getUpdates(lastUpdateId)
         println(responseString)
-        val response: Response = json.decodeFromString(responseString)
+        val response: Response = botService.json.decodeFromString(responseString)
         val updates = response.result
         val firstUpdate = updates.firstOrNull() ?: continue
         val updateId = firstUpdate.updateId

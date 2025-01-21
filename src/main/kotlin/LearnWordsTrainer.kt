@@ -20,7 +20,6 @@ data class Question(
     val correctAnswer: Word,
 )
 
-
 class LearnWordsTrainer(
     private val learningAnswerCount: Int = 3,
     private val countOfQuestionWords: Int = 4,
