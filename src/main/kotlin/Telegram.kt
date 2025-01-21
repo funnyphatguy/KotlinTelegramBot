@@ -45,11 +45,11 @@ data class Chat(
 @Serializable
 data class SendMessageRequest(
     @SerialName("chat_id")
-    val chatId: Long,
+    val chatId: Long?,
     @SerialName("text")
     val text: String,
     @SerialName("reply_markup")
-    val replyMarkup: ReplyMarkup,
+    val replyMarkup: ReplyMarkup? = null,
 )
 
 @Serializable
@@ -101,6 +101,7 @@ fun main(args: Array<String>) {
 
 
         fun checkNextQuestionAndSend(
+            json: Json,
             trainer: LearnWordsTrainer,
             telegramBotService: TelegramBotService,
             chatId: Long?
@@ -108,8 +109,8 @@ fun main(args: Array<String>) {
             currentQuestion = trainer.getNextQuestion()
             if (currentQuestion != null
             ) {
-                telegramBotService.sendQuestion(chatId, currentQuestion!!)
-            } else telegramBotService.sendMessage(chatId, messageText = "Вы выучили все слова в списке")
+                telegramBotService.sendQuestion(json, chatId, currentQuestion!!)
+            } else telegramBotService.sendMessage(json, chatId, message = "Вы выучили все слова в списке")
         }
 
         if (data != null) {
@@ -117,42 +118,45 @@ fun main(args: Array<String>) {
                 val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
 
                 if (trainer.checkAnswer(userAnswerIndex)) {
-                    botService.sendMessage(chatId, messageText = "Правильно!")
-                    checkNextQuestionAndSend(trainer, botService, chatId)
+                    botService.sendMessage(json, chatId, message = "Правильно!")
+                    checkNextQuestionAndSend(json, trainer, botService, chatId)
                 } else {
                     botService.sendMessage(
+                        json,
                         chatId,
-                        messageText = "Неправильно! ${currentQuestion?.correctAnswer?.original} " +
+                        message = "Неправильно! ${currentQuestion?.correctAnswer?.original} " +
                                 "это ${currentQuestion?.correctAnswer?.translation}"
                     )
                     checkNextQuestionAndSend(
+                        json,
                         trainer,
                         botService,
                         chatId
                     )
                 }
             } else if (data.lowercase() == LEARN_WORDS_RESPONSE_PREFIX)
-                checkNextQuestionAndSend(trainer, botService, chatId)
+                checkNextQuestionAndSend(json, trainer, botService, chatId)
         }
 
         if (data?.lowercase() == BACK_PREFIX) {
-            botService.sendMenu(chatId)
+            botService.sendMenu(json, chatId)
         }
 
         if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
             botService.sendMessage(
+                json,
                 chatId,
-                messageText = "Выучено ${statistics.learnedCount} " +
+                message = "Выучено ${statistics.learnedCount} " +
                         "из ${statistics.totalCount} слов | ${statistics.percent}%"
             )
         }
 
         if (message?.lowercase() == "start") {
-            botService.sendMessage(chatId, messageText = "Hello!")
+            botService.sendMessage(json,chatId, message = "Hello!")
         }
 
         if (message?.lowercase() == "/start") {
-            botService.sendMenu(chatId)
+            botService.sendMenu(json, chatId)
         }
     }
 }
