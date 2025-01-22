@@ -1,7 +1,8 @@
 package org.example
 
-import javax.management.QueryExp
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Word(
     val original: String,
     val translation: String,
@@ -18,7 +19,6 @@ data class Question(
     val questionWords: List<Word>,
     val correctAnswer: Word,
 )
-
 
 class LearnWordsTrainer(
     private val learningAnswerCount: Int = 3,
