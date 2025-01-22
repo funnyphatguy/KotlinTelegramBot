@@ -16,7 +16,7 @@ class TelegramBotService(val json: Json, private val botToken: String) {
 
     private val client: HttpClient = HttpClient.newBuilder().build()
 
-    fun sendMessage(chatId: Long?, message: String): String {
+    fun sendMessage(chatId: Long, message: String): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
@@ -41,11 +41,11 @@ class TelegramBotService(val json: Json, private val botToken: String) {
         return response.body()
     }
 
-    fun sendQuestion(chatId: Long?, question: Question): String {
+    fun sendQuestion(chatId: Long, question: Question): String {
 
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
 
-        val variantsString = question.questionWords
+        question.questionWords
             .mapIndexed { index, word ->
                 """
         {
@@ -79,7 +79,7 @@ class TelegramBotService(val json: Json, private val botToken: String) {
         return response.body()
     }
 
-    fun sendMenu(chatId: Long?): String {
+    fun sendMenu(chatId: Long): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,

@@ -90,14 +90,14 @@ fun main(args: Array<String>) {
 
         val message = firstUpdate.message?.text
 
-        val chatId = firstUpdate.message?.chat?.id ?: firstUpdate.callbackQuery?.message?.chat?.id
+        val chatId = firstUpdate.message?.chat?.id ?: firstUpdate.callbackQuery?.message?.chat?.id ?: continue
 
         val data = firstUpdate.callbackQuery?.data
 
         fun checkNextQuestionAndSend(
             trainer: LearnWordsTrainer,
             telegramBotService: TelegramBotService,
-            chatId: Long?
+            chatId: Long
         ) {
             currentQuestion = trainer.getNextQuestion()
             if (currentQuestion != null
