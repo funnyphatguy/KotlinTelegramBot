@@ -66,45 +66,59 @@ data class InlineKeyBoard(
     val text: String,
 )
 
+
+
+val trainer: LearnWordsTrainer = LearnWordsTrainer()
+
+var currentQuestion: Question? = null
+
+val statistics = trainer.getStatistics()
+
+
 fun main(args: Array<String>) {
 
-    val trainer: LearnWordsTrainer = LearnWordsTrainer()
 
-    var currentQuestion: Question? = null
 
-    val statistics = trainer.getStatistics()
+    val json = Json { ignoreUnknownKeys = true }
 
-    val botService = TelegramBotService(json = Json { ignoreUnknownKeys = true }, botToken = args[0])
+    val botService = TelegramBotService(json = json, botToken = args[0])
 
     var lastUpdateId = 0L
+
+
 
     while (true) {
         Thread.sleep(2000)
         val responseString: String = botService.getUpdates(lastUpdateId)
         println(responseString)
         val response: Response = botService.json.decodeFromString(responseString)
-        val updates = response.result
-        val firstUpdate = updates.firstOrNull() ?: continue
-        val updateId = firstUpdate.updateId
-        lastUpdateId = updateId + 1
+        if (response.result.isEmpty()) continue
+        val sortedUpdates = response.result.sortedBy { it.updateId }
+        sortedUpdates.forEach { handleUpdate(it, json, botService, trainer) }
+        lastUpdateId = sortedUpdates.last().updateId + 1
+    }
+}
 
-        val message = firstUpdate.message?.text
+fun checkNextQuestionAndSend(
+    trainer: LearnWordsTrainer,
+    telegramBotService: TelegramBotService,
+    chatId: Long?
+) {
+    currentQuestion = trainer.getNextQuestion()
+    if (currentQuestion != null
+    ) {
+        telegramBotService.sendQuestion(chatId, currentQuestion!!)
+    } else telegramBotService.sendMessage(chatId, message = "Вы выучили все слова в списке")
+}
 
-        val chatId = firstUpdate.message?.chat?.id ?: firstUpdate.callbackQuery?.message?.chat?.id ?: continue
+    fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, trainer: LearnWordsTrainer) {
 
-        val data = firstUpdate.callbackQuery?.data
+        val message = update.message?.text
 
-        fun checkNextQuestionAndSend(
-            trainer: LearnWordsTrainer,
-            telegramBotService: TelegramBotService,
-            chatId: Long
-        ) {
-            currentQuestion = trainer.getNextQuestion()
-            if (currentQuestion != null
-            ) {
-                telegramBotService.sendQuestion(chatId, currentQuestion!!)
-            } else telegramBotService.sendMessage(chatId, message = "Вы выучили все слова в списке")
-        }
+        val chatId = update.message?.chat?.id ?: update.callbackQuery?.message?.chat?.id
+
+        val data = update.callbackQuery?.data
+
 
         if (data != null) {
             if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)) {
@@ -149,4 +163,4 @@ fun main(args: Array<String>) {
             botService.sendMenu(chatId)
         }
     }
-}
+
