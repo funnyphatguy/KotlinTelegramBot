@@ -71,7 +71,7 @@ val trainer: LearnWordsTrainer = LearnWordsTrainer()
 
 var currentQuestion: Question? = null
 
-val statistics = trainer.getStatistics()
+
 
 
 fun main(args: Array<String>) {
@@ -149,6 +149,7 @@ fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, tra
     }
 
     if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
+        val statistics = trainer.getStatistics()
         botService.sendMessage(
             chatId,
             message = "Выучено ${statistics.learnedCount} " +
