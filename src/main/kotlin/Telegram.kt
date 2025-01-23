@@ -67,11 +67,7 @@ data class InlineKeyBoard(
 )
 
 
-val trainer: LearnWordsTrainer = LearnWordsTrainer()
-
 var currentQuestion: Question? = null
-
-
 
 
 fun main(args: Array<String>) {
@@ -93,7 +89,7 @@ fun main(args: Array<String>) {
         val response: Response = botService.json.decodeFromString(responseString)
         if (response.result.isEmpty()) continue
         val sortedUpdates = response.result.sortedBy { it.updateId }
-        sortedUpdates.forEach { handleUpdate(it, json, botService, traners) }
+        sortedUpdates.forEach { handleUpdate(it, botService, traners) }
         lastUpdateId = sortedUpdates.last().updateId + 1
     }
 }
@@ -110,7 +106,7 @@ fun checkNextQuestionAndSend(
     } else telegramBotService.sendMessage(chatId, message = "Вы выучили все слова в списке")
 }
 
-fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, trainers: HashMap<Long, LearnWordsTrainer>) {
+fun handleUpdate(update: Update, botService: TelegramBotService, trainers: HashMap<Long, LearnWordsTrainer>) {
 
     val message = update.message?.text
 
@@ -118,7 +114,7 @@ fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, tra
 
     val data = update.callbackQuery?.data
 
-    val trainer = trainers.getOrPut(chatId) {LearnWordsTrainer("$chatId.txt")}
+    val trainer = trainers.getOrPut(chatId) { LearnWordsTrainer("$chatId.txt") }
 
 
     if (data != null) {
@@ -155,6 +151,10 @@ fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, tra
             message = "Выучено ${statistics.learnedCount} " +
                     "из ${statistics.totalCount} слов | ${statistics.percent}%"
         )
+    }
+    if (data == RESET_CLICKED) {
+        trainer.resetProgress()
+        botService.sendMessage(chatId, message = "Прогресс сброшен")
     }
 
     if (message?.lowercase() == "start") {

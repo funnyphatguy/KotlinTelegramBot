@@ -63,31 +63,13 @@ class LearnWordsTrainer(
             val userAnswerId = it.questionWords.indexOf(it.correctAnswer)
             if (userAnswerId == userAnswerIndex) {
                 it.correctAnswer.correctAnswersCount++
-                saveDictionary(dictionary)
+                saveDictionary()
                 true
             } else {
                 false
             }
         } ?: false
     }
-
-//    private fun loadDictionary(): List<Word> {
-////        try {
-////            val dictionary: MutableList<Word> = mutableListOf()
-////            wordsFile.forEachLine { line ->
-////                val cells = line.split("|")
-////                val word = Word(
-////                    original = cells[0],
-////                    translation = cells[1],
-////                    correctAnswersCount = cells.getOrNull(2)?.toIntOrNull() ?: 0
-////                )
-////                dictionary.add(word)
-////            }
-////            return dictionary
-////        } catch (e: IndexOutOfBoundsException) {
-////            throw IllegalStateException("некорректный файл")
-////        }
-//    }
 
     private fun loadDictionary(): List<Word> {
         try {
@@ -106,20 +88,17 @@ class LearnWordsTrainer(
         }
     }
 
-//    private fun saveDictionary(dictionary: List<Word>) {
-//        wordsFile.printWriter().use { out ->
-//            dictionary.forEach { word ->
-//                out.write("${word.original}|${word.translation}|${word.correctAnswersCount}\n")
-//            }
-//        }
-//    }
-
-
-    private fun saveDictionary(dictionary: List<Word>) {
+    private fun saveDictionary() {
         val wordsFile = File(fileName)
         wordsFile.writeText("")
         for (word in dictionary) {
             wordsFile.appendText("${word.original}|${word.translation}|${word.correctAnswersCount}\n")
         }
     }
+
+    fun resetProgress() {
+        dictionary.forEach {it.correctAnswersCount = 0}
+        saveDictionary()
+    }
+
 }
