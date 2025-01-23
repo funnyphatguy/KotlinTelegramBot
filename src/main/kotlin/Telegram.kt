@@ -67,7 +67,6 @@ data class InlineKeyBoard(
 )
 
 
-
 val trainer: LearnWordsTrainer = LearnWordsTrainer()
 
 var currentQuestion: Question? = null
@@ -78,13 +77,13 @@ val statistics = trainer.getStatistics()
 fun main(args: Array<String>) {
 
 
-
     val json = Json { ignoreUnknownKeys = true }
 
     val botService = TelegramBotService(json = json, botToken = args[0])
 
     var lastUpdateId = 0L
 
+    val traners = HashMap<Long, LearnWordsTrainer>()
 
 
     while (true) {
@@ -94,7 +93,7 @@ fun main(args: Array<String>) {
         val response: Response = botService.json.decodeFromString(responseString)
         if (response.result.isEmpty()) continue
         val sortedUpdates = response.result.sortedBy { it.updateId }
-        sortedUpdates.forEach { handleUpdate(it, json, botService, trainer) }
+        sortedUpdates.forEach { handleUpdate(it, json, botService, traners) }
         lastUpdateId = sortedUpdates.last().updateId + 1
     }
 }
@@ -111,56 +110,58 @@ fun checkNextQuestionAndSend(
     } else telegramBotService.sendMessage(chatId, message = "Вы выучили все слова в списке")
 }
 
-    fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, trainer: LearnWordsTrainer) {
+fun handleUpdate(update: Update, json: Json, botService: TelegramBotService, trainers: HashMap<Long, LearnWordsTrainer>) {
 
-        val message = update.message?.text
+    val message = update.message?.text
 
-        val chatId = update.message?.chat?.id ?: update.callbackQuery?.message?.chat?.id
+    val chatId = update.message?.chat?.id ?: update.callbackQuery?.message?.chat?.id ?: return
 
-        val data = update.callbackQuery?.data
+    val data = update.callbackQuery?.data
+
+    val trainer = trainers.getOrPut(chatId) {LearnWordsTrainer("$chatId.txt")}
 
 
-        if (data != null) {
-            if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)) {
-                val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
+    if (data != null) {
+        if (data.startsWith(CALLBACK_DATA_ANSWER_PREFIX)) {
+            val userAnswerIndex = data.substringAfter(CALLBACK_DATA_ANSWER_PREFIX).toInt()
 
-                if (trainer.checkAnswer(userAnswerIndex)) {
-                    botService.sendMessage(chatId, message = "Правильно!")
-                    checkNextQuestionAndSend(trainer, botService, chatId)
-                } else {
-                    botService.sendMessage(
-                        chatId,
-                        message = "Неправильно! ${currentQuestion?.correctAnswer?.original} " +
-                                "это ${currentQuestion?.correctAnswer?.translation}"
-                    )
-                    checkNextQuestionAndSend(
-                        trainer,
-                        botService,
-                        chatId
-                    )
-                }
-            } else if (data.lowercase() == LEARN_WORDS_RESPONSE_PREFIX)
+            if (trainer.checkAnswer(userAnswerIndex)) {
+                botService.sendMessage(chatId, message = "Правильно!")
                 checkNextQuestionAndSend(trainer, botService, chatId)
-        }
-
-        if (data?.lowercase() == BACK_PREFIX) {
-            botService.sendMenu(chatId)
-        }
-
-        if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
-            botService.sendMessage(
-                chatId,
-                message = "Выучено ${statistics.learnedCount} " +
-                        "из ${statistics.totalCount} слов | ${statistics.percent}%"
-            )
-        }
-
-        if (message?.lowercase() == "start") {
-            botService.sendMessage(chatId, message = "Hello!")
-        }
-
-        if (message?.lowercase() == "/start") {
-            botService.sendMenu(chatId)
-        }
+            } else {
+                botService.sendMessage(
+                    chatId,
+                    message = "Неправильно! ${currentQuestion?.correctAnswer?.original} " +
+                            "это ${currentQuestion?.correctAnswer?.translation}"
+                )
+                checkNextQuestionAndSend(
+                    trainer,
+                    botService,
+                    chatId
+                )
+            }
+        } else if (data.lowercase() == LEARN_WORDS_RESPONSE_PREFIX)
+            checkNextQuestionAndSend(trainer, botService, chatId)
     }
+
+    if (data?.lowercase() == BACK_PREFIX) {
+        botService.sendMenu(chatId)
+    }
+
+    if (data?.lowercase() == STATISTICS_RESPONSE_PREFIX) {
+        botService.sendMessage(
+            chatId,
+            message = "Выучено ${statistics.learnedCount} " +
+                    "из ${statistics.totalCount} слов | ${statistics.percent}%"
+        )
+    }
+
+    if (message?.lowercase() == "start") {
+        botService.sendMessage(chatId, message = "Hello!")
+    }
+
+    if (message?.lowercase() == "/start") {
+        botService.sendMenu(chatId)
+    }
+}
 
