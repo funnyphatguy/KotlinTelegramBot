@@ -14,8 +14,9 @@ fun Question.asConsoleString(): String {
 val wordsFile = File("words.txt")
 
 fun main() {
+
     val trainer = try {
-        LearnWordsTrainer(3, 4, 2)
+        LearnWordsTrainer(learningAnswerCount = 3, countOfQuestionWords = 4, worldLearningTarget = 2)
     } catch (e: Exception) {
         println("Невозможно загрузить словарь")
         return

@@ -11,12 +11,13 @@ const val LEARN_WORDS_RESPONSE_PREFIX = "learn_words_clicked"
 const val STATISTICS_RESPONSE_PREFIX = "statistics_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 const val BACK_PREFIX = "back"
+const val RESET_CLICKED = "reset_clicked"
 
 class TelegramBotService(val json: Json, private val botToken: String) {
 
     private val client: HttpClient = HttpClient.newBuilder().build()
 
-    fun sendMessage(chatId: Long, message: String): String {
+    fun sendMessage(chatId: Long?, message: String): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
@@ -41,7 +42,7 @@ class TelegramBotService(val json: Json, private val botToken: String) {
         return response.body()
     }
 
-    fun sendQuestion(chatId: Long, question: Question): String {
+    fun sendQuestion(chatId: Long?, question: Question): String {
 
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
 
@@ -79,7 +80,7 @@ class TelegramBotService(val json: Json, private val botToken: String) {
         return response.body()
     }
 
-    fun sendMenu(chatId: Long): String {
+    fun sendMenu(chatId: Long?): String {
         val urlSendMessage: String = "$BOT_URL$botToken/sendMessage"
         val requestBody = SendMessageRequest(
             chatId = chatId,
@@ -89,6 +90,9 @@ class TelegramBotService(val json: Json, private val botToken: String) {
                     listOf(
                         InlineKeyBoard(text = "Изучать слова", callbackData = LEARN_WORDS_RESPONSE_PREFIX),
                         InlineKeyBoard(text = "Статистика", callbackData = STATISTICS_RESPONSE_PREFIX),
+                    ),
+                    listOf(
+                        InlineKeyBoard(text = "Сбросить прогресс", callbackData = RESET_CLICKED),
                     )
                 )
             )
